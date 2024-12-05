@@ -1,6 +1,11 @@
 import { bcryptAdapter } from "../../config";
 import { UserModel } from "../../data";
-import { CustomError, RegisterUserDto, UserEntity } from "../../domain";
+import {
+  CustomError,
+  LoginUserDto,
+  RegisterUserDto,
+  UserEntity,
+} from "../../domain";
 
 export class AuthService {
   constructor() {}
@@ -28,5 +33,27 @@ export class AuthService {
     } catch (error) {
       throw CustomError.internalServer(`${error}`);
     }
+  }
+
+  public async loginUser(loginUserDto: LoginUserDto) {
+    // FindOne para verificar si existe
+    const user = await UserModel.findOne({ email: loginUserDto.email });
+    if (!user)
+      throw CustomError.badRequest(
+        `User with email ${loginUserDto.email} was not found`
+      );
+    //isMatch...bcrypt...compare(123456,sfaffaio3)
+    const isMatching = bcryptAdapter.compare(
+      loginUserDto.password,
+      user.password
+    );
+    if (!isMatching)
+      throw CustomError.badRequest("Password is not correct. Please try again");
+
+    const { password, ...userEntity } = UserEntity.fromObject(user);
+    return {
+      user: userEntity,
+      token: "ABC",
+    };
   }
 }

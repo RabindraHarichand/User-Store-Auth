@@ -79,7 +79,7 @@ export class AuthService {
 
     if (!token) throw CustomError.internalServer("Error getting token");
 
-    const link = `${envs.WEBSERVICE_URL}/auth/validate-email/${token}`;
+    const link = `${envs.WEBSERVICE_URL}/api/auth/validate-email/${token}`;
     const html = `
     <h1>Validate your Email</h1>
     <p>Click on the following link to validate your email</p>

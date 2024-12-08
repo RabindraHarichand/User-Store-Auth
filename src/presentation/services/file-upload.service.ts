@@ -5,7 +5,7 @@ import { Uuid } from "../../config";
 import { CustomError } from "../../domain";
 
 export class FileUploadService {
-  constructor(private readonly uuid = Uuid.v4()) {}
+  constructor(private readonly uuid = Uuid.v4) {}
 
   private checkFolder(folderPath: string) {
     if (!fs.existsSync(folderPath)) {
@@ -29,7 +29,7 @@ export class FileUploadService {
       const destination = path.resolve(__dirname, "../../../", folder);
       this.checkFolder(destination);
 
-      const fileName = `${this.uuid}.${fileExtension}`;
+      const fileName = `${this.uuid()}.${fileExtension}`;
 
       file.mv(`${destination}/${fileName}`);
 
@@ -39,9 +39,15 @@ export class FileUploadService {
     }
   }
 
-  uploadMultiple(
-    file: any[],
+  async uploadMultiple(
+    files: UploadedFile[],
     folder: string = "uploads",
     validExtensions: string[] = ["png", "jpg", "jpeg", "gif"]
-  ) {}
+  ) {
+    const fileNames = await Promise.all(
+      files.map((file) => this.uploadSingle(file, folder, validExtensions))
+    );
+
+    return fileNames;
+  }
 }
